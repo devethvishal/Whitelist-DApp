@@ -14,6 +14,7 @@ export default function Home() {
   const [walletConnectionStatus, setWalletConnectionStatus] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subsbribedWhitelist,setSubsbcribedWhitelist] = useState(false);
+  const [numberOfWhitelistedAddr, setNumberOfWhitelistedAddr] = useState(0);
   const web3ModalRef = useRef();
   
 
@@ -61,18 +62,35 @@ export default function Home() {
       await tx.wait();
       setLoading(false);
       setSubsbcribedWhitelist(true);
+      getNumberOfWhitelisted();
 
     }catch(err){
       console.log(err);
     }
   }
   
+  const getNumberOfWhitelisted = async () =>{
+    try{
+      const signer = await getProviderOrSigner();
+      const whitelistContract = new Contract(
+        contractAddress,
+        contractABI,
+        signer
+      );
+      console.log('called');
+      const _numberOfWhitelisted = await whitelistContract.numberOfWhitelistedAddress();
+      setNumberOfWhitelistedAddr(_numberOfWhitelisted);
+    }catch(err){
+      console.log(err);
+    }
+  }
+
   const connectWallet = async () => {
     await getProviderOrSigner();
+    await getNumberOfWhitelisted();
     setWalletConnectionStatus(true); 
-    await checkIfWhitelisted();
+    await checkIfWhitelisted();    
     setLoading(false);
-
   }
   
   
@@ -124,9 +142,9 @@ export default function Home() {
         <div className={styles.description}>
           Its an NFT collection for developers in Crypto.
         </div>
-        {/* <div className={styles.description}>
-          {numberOfWhitelisted} have already joined the Whitelist
-        </div> */}
+        <div className={styles.description}>
+          {numberOfWhitelistedAddr} have already joined the Whitelist
+        </div>
         {renderButton()}
       </div>
       <div>
